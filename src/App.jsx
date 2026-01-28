@@ -1,55 +1,78 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Sample product data - replace with your actual inventory
+// Image URLs from Unsplash (free to use)
+const IMAGES = {
+  hero: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600&h=900&fit=crop",
+  bat: "https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=400&h=400&fit=crop",
+  gloves: "https://images.unsplash.com/photo-1559812686-e95a0a66f965?w=400&h=400&fit=crop",
+  pads: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop",
+  shoes: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop",
+  wkGloves: "https://images.unsplash.com/photo-1559812686-e95a0a66f965?w=400&h=400&fit=crop",
+  kids: "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?w=400&h=400&fit=crop",
+  helmet: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=400&h=400&fit=crop",
+  ball: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop",
+  bag: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
+  accessories: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=400&fit=crop",
+};
+
+// Category images for the homepage
+const CATEGORY_IMAGES = {
+  Bats: "https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=600&h=600&fit=crop",
+  Gloves: "https://images.unsplash.com/photo-1559812686-e95a0a66f965?w=600&h=600&fit=crop",
+  Pads: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&h=600&fit=crop",
+  Shoes: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=600&fit=crop",
+};
+
+// Sample product data with real images
 const sampleProducts = [
   // Bats
-  { id: 1, name: "SS Super Power English Willow", category: "Bats", brand: "SS", price: 200, image: "🏏", description: "Premium English willow bat with excellent pickup", inStock: true },
-  { id: 2, name: "SG KLR Xtreme", category: "Bats", brand: "SG", price: 275, image: "🏏", description: "Professional grade English willow cricket bat", inStock: true },
-  { id: 3, name: "CEAT Marvel English Willow", category: "Bats", brand: "CEAT", price: 275, image: "🏏", description: "Signature series with premium sweet spot", inStock: true },
-  { id: 4, name: "SS Royal Retro Classic", category: "Bats", brand: "SS", price: 200, image: "🏏", description: "Classic design with modern performance", inStock: false },
-  { id: 5, name: "Gray-Nicolls Powerbow", category: "Bats", brand: "Gray-Nicolls", price: 320, image: "🏏", description: "Iconic bow shape for powerful strokes", inStock: true },
+  { id: 1, name: "SS Super Power English Willow", category: "Bats", brand: "SS", price: 200, image: IMAGES.bat, description: "Premium English willow bat with excellent pickup", inStock: true },
+  { id: 2, name: "SG KLR Xtreme", category: "Bats", brand: "SG", price: 275, image: IMAGES.bat, description: "Professional grade English willow cricket bat", inStock: true },
+  { id: 3, name: "CEAT Marvel English Willow", category: "Bats", brand: "CEAT", price: 275, image: IMAGES.bat, description: "Signature series with premium sweet spot", inStock: true },
+  { id: 4, name: "SS Royal Retro Classic", category: "Bats", brand: "SS", price: 200, image: IMAGES.bat, description: "Classic design with modern performance", inStock: false },
+  { id: 5, name: "Gray-Nicolls Powerbow", category: "Bats", brand: "Gray-Nicolls", price: 320, image: IMAGES.bat, description: "Iconic bow shape for powerful strokes", inStock: true },
   
   // Gloves
-  { id: 6, name: "SG KLR Lite Batting Gloves", category: "Gloves", brand: "SG", price: 60, image: "🧤", description: "Lightweight protection with superior grip", inStock: true },
-  { id: 7, name: "SS Super Test IPL Gloves", category: "Gloves", brand: "SS", price: 55, image: "🧤", description: "IPL edition batting gloves", inStock: true },
-  { id: 8, name: "SG Test White Batting Gloves", category: "Gloves", brand: "SG", price: 55, image: "🧤", description: "Traditional white test match gloves", inStock: true },
-  { id: 9, name: "SS Matrix Batting Gloves", category: "Gloves", brand: "SS", price: 65, image: "🧤", description: "Premium protection with flex zones", inStock: true },
-  { id: 10, name: "Gray-Nicolls GN+ Batting Gloves", category: "Gloves", brand: "Gray-Nicolls", price: 75, image: "🧤", description: "Professional grade batting gloves", inStock: true },
+  { id: 6, name: "SG KLR Lite Batting Gloves", category: "Gloves", brand: "SG", price: 60, image: IMAGES.gloves, description: "Lightweight protection with superior grip", inStock: true },
+  { id: 7, name: "SS Super Test IPL Gloves", category: "Gloves", brand: "SS", price: 55, image: IMAGES.gloves, description: "IPL edition batting gloves", inStock: true },
+  { id: 8, name: "SG Test White Batting Gloves", category: "Gloves", brand: "SG", price: 55, image: IMAGES.gloves, description: "Traditional white test match gloves", inStock: true },
+  { id: 9, name: "SS Matrix Batting Gloves", category: "Gloves", brand: "SS", price: 65, image: IMAGES.gloves, description: "Premium protection with flex zones", inStock: true },
+  { id: 10, name: "Gray-Nicolls GN+ Batting Gloves", category: "Gloves", brand: "Gray-Nicolls", price: 75, image: IMAGES.gloves, description: "Professional grade batting gloves", inStock: true },
   
   // Pads
-  { id: 11, name: "SG League Batting Pads", category: "Pads", brand: "SG", price: 85, image: "🦵", description: "Excellent protection for club cricket", inStock: true },
-  { id: 12, name: "SS Sunridges Pads", category: "Pads", brand: "SS", price: 90, image: "🦵", description: "Traditional cane construction", inStock: true },
-  { id: 13, name: "Gray-Nicolls Ultimate Pads", category: "Pads", brand: "Gray-Nicolls", price: 120, image: "🦵", description: "Lightweight with maximum protection", inStock: true },
-  { id: 14, name: "SG Campus Pads", category: "Pads", brand: "SG", price: 45, image: "🦵", description: "Entry level batting pads", inStock: true },
+  { id: 11, name: "SG League Batting Pads", category: "Pads", brand: "SG", price: 85, image: IMAGES.pads, description: "Excellent protection for club cricket", inStock: true },
+  { id: 12, name: "SS Sunridges Pads", category: "Pads", brand: "SS", price: 90, image: IMAGES.pads, description: "Traditional cane construction", inStock: true },
+  { id: 13, name: "Gray-Nicolls Ultimate Pads", category: "Pads", brand: "Gray-Nicolls", price: 120, image: IMAGES.pads, description: "Lightweight with maximum protection", inStock: true },
+  { id: 14, name: "SG Campus Pads", category: "Pads", brand: "SG", price: 45, image: IMAGES.pads, description: "Entry level batting pads", inStock: true },
   
   // WK Equipment
-  { id: 15, name: "SG League WK Gloves", category: "WK Equipment", brand: "SG", price: 80, image: "🧤", description: "Professional wicket keeping gloves", inStock: true },
-  { id: 16, name: "SS Reserve Edition WK Gloves", category: "WK Equipment", brand: "SS", price: 95, image: "🧤", description: "Premium leather construction", inStock: true },
-  { id: 17, name: "SG WK Pads", category: "WK Equipment", brand: "SG", price: 75, image: "🦵", description: "Lightweight keeping pads", inStock: true },
-  { id: 18, name: "SS Dragon WK Inner Gloves", category: "WK Equipment", brand: "SS", price: 25, image: "🧤", description: "Cotton padded inners", inStock: true },
+  { id: 15, name: "SG League WK Gloves", category: "WK Equipment", brand: "SG", price: 80, image: IMAGES.wkGloves, description: "Professional wicket keeping gloves", inStock: true },
+  { id: 16, name: "SS Reserve Edition WK Gloves", category: "WK Equipment", brand: "SS", price: 95, image: IMAGES.wkGloves, description: "Premium leather construction", inStock: true },
+  { id: 17, name: "SG WK Pads", category: "WK Equipment", brand: "SG", price: 75, image: IMAGES.pads, description: "Lightweight keeping pads", inStock: true },
+  { id: 18, name: "SS Dragon WK Inner Gloves", category: "WK Equipment", brand: "SS", price: 25, image: IMAGES.gloves, description: "Cotton padded inners", inStock: true },
   
   // Shoes
-  { id: 19, name: "Adidas Howzat Cricket Spikes", category: "Shoes", brand: "Adidas", price: 100, image: "👟", description: "Full spike cricket shoes", inStock: true },
-  { id: 20, name: "Asics Gully 5 Cricket Shoes", category: "Shoes", brand: "Asics", price: 150, image: "👟", description: "Rubber sole all-rounder shoes", inStock: true },
-  { id: 21, name: "Puma Cricket 22 FH", category: "Shoes", brand: "Puma", price: 130, image: "👟", description: "Half spike cricket footwear", inStock: true },
-  { id: 22, name: "SG Sierra Cricket Shoes", category: "Shoes", brand: "SG", price: 75, image: "👟", description: "Affordable rubber sole shoes", inStock: true },
+  { id: 19, name: "Adidas Howzat Cricket Spikes", category: "Shoes", brand: "Adidas", price: 100, image: IMAGES.shoes, description: "Full spike cricket shoes", inStock: true },
+  { id: 20, name: "Asics Gully 5 Cricket Shoes", category: "Shoes", brand: "Asics", price: 150, image: IMAGES.shoes, description: "Rubber sole all-rounder shoes", inStock: true },
+  { id: 21, name: "Puma Cricket 22 FH", category: "Shoes", brand: "Puma", price: 130, image: IMAGES.shoes, description: "Half spike cricket footwear", inStock: true },
+  { id: 22, name: "SG Sierra Cricket Shoes", category: "Shoes", brand: "SG", price: 75, image: IMAGES.shoes, description: "Affordable rubber sole shoes", inStock: true },
   
   // Kids
-  { id: 23, name: "SS Junior Cricket Bat Size 5", category: "Kids", brand: "SS", price: 45, image: "🏏", description: "Kashmir willow junior bat", inStock: true },
-  { id: 24, name: "SG Junior Batting Set", category: "Kids", brand: "SG", price: 120, image: "🎒", description: "Complete batting kit for juniors", inStock: true },
-  { id: 25, name: "Junior Batting Gloves", category: "Kids", brand: "SG", price: 35, image: "🧤", description: "Youth size batting gloves", inStock: true },
-  { id: 26, name: "Kids Cricket Pads", category: "Kids", brand: "SS", price: 40, image: "🦵", description: "Youth batting leg guards", inStock: true },
+  { id: 23, name: "SS Junior Cricket Bat Size 5", category: "Kids", brand: "SS", price: 45, image: IMAGES.bat, description: "Kashmir willow junior bat", inStock: true },
+  { id: 24, name: "SG Junior Batting Set", category: "Kids", brand: "SG", price: 120, image: IMAGES.kids, description: "Complete batting kit for juniors", inStock: true },
+  { id: 25, name: "Junior Batting Gloves", category: "Kids", brand: "SG", price: 35, image: IMAGES.gloves, description: "Youth size batting gloves", inStock: true },
+  { id: 26, name: "Kids Cricket Pads", category: "Kids", brand: "SS", price: 40, image: IMAGES.pads, description: "Youth batting leg guards", inStock: true },
   
   // Accessories
-  { id: 27, name: "Pro Fingerless Gloves Inner", category: "Accessories", brand: "Generic", price: 10, image: "🧤", description: "Inner gloves for comfort", inStock: true },
-  { id: 28, name: "Players Full Gloves Inner", category: "Accessories", brand: "Generic", price: 15, image: "🧤", description: "Full finger cotton inners", inStock: true },
-  { id: 29, name: "SS Ranjimax Cricket Ball", category: "Accessories", brand: "SS", price: 50, image: "🏐", description: "Premium leather cricket ball", inStock: true },
-  { id: 30, name: "Cricket Kit Bag Large", category: "Accessories", brand: "SG", price: 85, image: "🎒", description: "Wheelie kit bag", inStock: true },
-  { id: 31, name: "Bat Grip Set (3 Pack)", category: "Accessories", brand: "Generic", price: 12, image: "📦", description: "Replacement bat grips", inStock: true },
-  { id: 32, name: "Cricket Helmet Senior", category: "Accessories", brand: "Shrey", price: 95, image: "⛑️", description: "Steel grill cricket helmet", inStock: true },
-  { id: 33, name: "Arm Guard", category: "Accessories", brand: "SG", price: 18, image: "💪", description: "Forearm protection", inStock: true },
-  { id: 34, name: "Thigh Guard Set", category: "Accessories", brand: "SS", price: 28, image: "🦵", description: "Inner and outer thigh pads", inStock: true },
-  { id: 35, name: "Abdominal Guard", category: "Accessories", brand: "SG", price: 15, image: "🛡️", description: "Essential protection", inStock: true },
+  { id: 27, name: "Pro Fingerless Gloves Inner", category: "Accessories", brand: "Generic", price: 10, image: IMAGES.gloves, description: "Inner gloves for comfort", inStock: true },
+  { id: 28, name: "Players Full Gloves Inner", category: "Accessories", brand: "Generic", price: 15, image: IMAGES.gloves, description: "Full finger cotton inners", inStock: true },
+  { id: 29, name: "SS Ranjimax Cricket Ball", category: "Accessories", brand: "SS", price: 50, image: IMAGES.ball, description: "Premium leather cricket ball", inStock: true },
+  { id: 30, name: "Cricket Kit Bag Large", category: "Accessories", brand: "SG", price: 85, image: IMAGES.bag, description: "Wheelie kit bag", inStock: true },
+  { id: 31, name: "Bat Grip Set (3 Pack)", category: "Accessories", brand: "Generic", price: 12, image: IMAGES.accessories, description: "Replacement bat grips", inStock: true },
+  { id: 32, name: "Cricket Helmet Senior", category: "Accessories", brand: "Shrey", price: 95, image: IMAGES.helmet, description: "Steel grill cricket helmet", inStock: true },
+  { id: 33, name: "Arm Guard", category: "Accessories", brand: "SG", price: 18, image: IMAGES.accessories, description: "Forearm protection", inStock: true },
+  { id: 34, name: "Thigh Guard Set", category: "Accessories", brand: "SS", price: 28, image: IMAGES.pads, description: "Inner and outer thigh pads", inStock: true },
+  { id: 35, name: "Abdominal Guard", category: "Accessories", brand: "SG", price: 15, image: IMAGES.accessories, description: "Essential protection", inStock: true },
 ];
 
 const categories = ["All", "Bats", "Gloves", "Pads", "WK Equipment", "Shoes", "Kids", "Accessories"];
@@ -214,31 +237,21 @@ export default function RNRCricket() {
     </nav>
   );
 
-  // Hero Section
+  // Hero Section with real image
   const Hero = () => (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${IMAGES.hero})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/95 via-blue-900/90 to-blue-800/80"></div>
+      </div>
+      
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-white/20 rounded-full"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/10 rounded-full"></div>
-      </div>
-      
-      {/* Cricket Ball Pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(6)].map((_, i) => (
-          <div 
-            key={i}
-            className="absolute w-16 h-16 border-2 border-red-500/20 rounded-full"
-            style={{
-              top: `${20 + i * 15}%`,
-              left: `${10 + i * 15}%`,
-              animation: `float ${3 + i * 0.5}s ease-in-out infinite`,
-              animationDelay: `${i * 0.3}s`
-            }}
-          />
-        ))}
       </div>
 
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
@@ -282,17 +295,10 @@ export default function RNRCricket() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
-
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-      `}</style>
     </section>
   );
 
-  // Featured Categories
+  // Featured Categories with real images
   const FeaturedCategories = () => (
     <section className="py-20 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -303,20 +309,26 @@ export default function RNRCricket() {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[
-            { name: 'Bats', icon: '🏏', color: 'from-red-500 to-red-700' },
-            { name: 'Gloves', icon: '🧤', color: 'from-blue-500 to-blue-700' },
-            { name: 'Pads', icon: '🦵', color: 'from-green-500 to-green-700' },
-            { name: 'Shoes', icon: '👟', color: 'from-purple-500 to-purple-700' },
+            { name: 'Bats', color: 'from-red-500 to-red-700' },
+            { name: 'Gloves', color: 'from-blue-500 to-blue-700' },
+            { name: 'Pads', color: 'from-green-500 to-green-700' },
+            { name: 'Shoes', color: 'from-purple-500 to-purple-700' },
           ].map((cat) => (
             <button
               key={cat.name}
               onClick={() => { setSelectedCategory(cat.name); setCurrentPage('shop'); }}
-              className="group relative overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-gray-800 to-gray-900 p-6 transition-all duration-500 hover:scale-105 hover:shadow-2xl"
+              className="group relative overflow-hidden rounded-2xl aspect-square transition-all duration-500 hover:scale-105 hover:shadow-2xl"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-90 transition-opacity duration-500`}></div>
+              {/* Background Image */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url(${CATEGORY_IMAGES[cat.name]})` }}
+              />
+              {/* Overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-70 group-hover:opacity-85 transition-opacity duration-500`}></div>
+              {/* Content */}
               <div className="relative z-10 h-full flex flex-col items-center justify-center">
-                <span className="text-5xl sm:text-6xl mb-4 transition-transform duration-500 group-hover:scale-110">{cat.icon}</span>
-                <span className="text-white font-bold text-lg sm:text-xl tracking-wide">{cat.name.toUpperCase()}</span>
+                <span className="text-white font-bold text-lg sm:text-xl tracking-wide drop-shadow-lg">{cat.name.toUpperCase()}</span>
               </div>
             </button>
           ))}
@@ -351,16 +363,20 @@ export default function RNRCricket() {
     </section>
   );
 
-  // Product Card Component
+  // Product Card Component with real images
   const ProductCard = ({ product }) => (
     <div 
       className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500"
     >
       <div 
-        className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center cursor-pointer overflow-hidden"
+        className="relative aspect-square bg-gray-100 cursor-pointer overflow-hidden"
         onClick={() => setSelectedProduct(product)}
       >
-        <span className="text-7xl group-hover:scale-110 transition-transform duration-500">{product.image}</span>
+        <img 
+          src={product.image} 
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
         {!product.inStock && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <span className="text-white font-bold text-lg">OUT OF STOCK</span>
@@ -506,14 +522,18 @@ export default function RNRCricket() {
     </section>
   );
 
-  // Product Modal
+  // Product Modal with real image
   const ProductModal = () => {
     if (!selectedProduct) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedProduct(null)}>
         <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
-          <div className="relative aspect-video bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-            <span className="text-9xl">{selectedProduct.image}</span>
+          <div className="relative aspect-video bg-gray-100">
+            <img 
+              src={selectedProduct.image} 
+              alt={selectedProduct.name}
+              className="w-full h-full object-cover"
+            />
             <button 
               onClick={() => setSelectedProduct(null)}
               className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
@@ -550,7 +570,7 @@ export default function RNRCricket() {
     );
   };
 
-  // Cart Sidebar
+  // Cart Sidebar with real images
   const CartSidebar = () => (
     <div className={`fixed inset-0 z-50 ${cartOpen ? 'visible' : 'invisible'}`}>
       <div 
@@ -586,8 +606,8 @@ export default function RNRCricket() {
               <div className="space-y-4">
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-3xl flex-shrink-0">
-                      {item.image}
+                    <div className="w-16 h-16 bg-white rounded-lg flex-shrink-0 overflow-hidden">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{item.name}</h3>
@@ -883,7 +903,7 @@ export default function RNRCricket() {
     </section>
   );
 
-  // Shipping Policy Page (accessed via footer)
+  // Shipping Policy Page
   const ShippingPage = () => (
     <section className="pt-24 pb-20 min-h-screen">
       <div className="max-w-3xl mx-auto px-4">
