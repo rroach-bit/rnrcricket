@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-// Image URLs from Unsplash (free to use)
-const IMAGES = {
+// Supabase Configuration
+const supabaseUrl = 'https://hqjjfypcrndyamhlwjdd.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxampmeXBjcm5keWFtaGx3amRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1OTgzMzIsImV4cCI6MjA4NTE3NDMzMn0.zHAom2Owwwar65l5xOrD7_AmsL0FEO7qvJ1M-bfGrKw';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Image URLs from Unsplash (fallback/default images)
+const DEFAULT_IMAGES = {
   hero: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=1600&h=900&fit=crop",
   bat: "https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=400&h=400&fit=crop",
   gloves: "https://images.unsplash.com/photo-1559812686-e95a0a66f965?w=400&h=400&fit=crop",
   pads: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop",
   shoes: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop",
-  wkGloves: "https://images.unsplash.com/photo-1559812686-e95a0a66f965?w=400&h=400&fit=crop",
-  kids: "https://images.unsplash.com/photo-1471295253337-3ceaaedca402?w=400&h=400&fit=crop",
-  helmet: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=400&h=400&fit=crop",
-  ball: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&h=400&fit=crop",
-  bag: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-  accessories: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=400&fit=crop",
+  default: "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400&h=400&fit=crop",
 };
 
 // Category images for the homepage
@@ -23,63 +24,16 @@ const CATEGORY_IMAGES = {
   Shoes: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=600&fit=crop",
 };
 
-// Sample product data with real images
-const sampleProducts = [
-  // Bats
-  { id: 1, name: "SS Super Power English Willow", category: "Bats", brand: "SS", price: 200, image: IMAGES.bat, description: "Premium English willow bat with excellent pickup", inStock: true },
-  { id: 2, name: "SG KLR Xtreme", category: "Bats", brand: "SG", price: 275, image: IMAGES.bat, description: "Professional grade English willow cricket bat", inStock: true },
-  { id: 3, name: "CEAT Marvel English Willow", category: "Bats", brand: "CEAT", price: 275, image: IMAGES.bat, description: "Signature series with premium sweet spot", inStock: true },
-  { id: 4, name: "SS Royal Retro Classic", category: "Bats", brand: "SS", price: 200, image: IMAGES.bat, description: "Classic design with modern performance", inStock: false },
-  { id: 5, name: "Gray-Nicolls Powerbow", category: "Bats", brand: "Gray-Nicolls", price: 320, image: IMAGES.bat, description: "Iconic bow shape for powerful strokes", inStock: true },
-  
-  // Gloves
-  { id: 6, name: "SG KLR Lite Batting Gloves", category: "Gloves", brand: "SG", price: 60, image: IMAGES.gloves, description: "Lightweight protection with superior grip", inStock: true },
-  { id: 7, name: "SS Super Test IPL Gloves", category: "Gloves", brand: "SS", price: 55, image: IMAGES.gloves, description: "IPL edition batting gloves", inStock: true },
-  { id: 8, name: "SG Test White Batting Gloves", category: "Gloves", brand: "SG", price: 55, image: IMAGES.gloves, description: "Traditional white test match gloves", inStock: true },
-  { id: 9, name: "SS Matrix Batting Gloves", category: "Gloves", brand: "SS", price: 65, image: IMAGES.gloves, description: "Premium protection with flex zones", inStock: true },
-  { id: 10, name: "Gray-Nicolls GN+ Batting Gloves", category: "Gloves", brand: "Gray-Nicolls", price: 75, image: IMAGES.gloves, description: "Professional grade batting gloves", inStock: true },
-  
-  // Pads
-  { id: 11, name: "SG League Batting Pads", category: "Pads", brand: "SG", price: 85, image: IMAGES.pads, description: "Excellent protection for club cricket", inStock: true },
-  { id: 12, name: "SS Sunridges Pads", category: "Pads", brand: "SS", price: 90, image: IMAGES.pads, description: "Traditional cane construction", inStock: true },
-  { id: 13, name: "Gray-Nicolls Ultimate Pads", category: "Pads", brand: "Gray-Nicolls", price: 120, image: IMAGES.pads, description: "Lightweight with maximum protection", inStock: true },
-  { id: 14, name: "SG Campus Pads", category: "Pads", brand: "SG", price: 45, image: IMAGES.pads, description: "Entry level batting pads", inStock: true },
-  
-  // WK Equipment
-  { id: 15, name: "SG League WK Gloves", category: "WK Equipment", brand: "SG", price: 80, image: IMAGES.wkGloves, description: "Professional wicket keeping gloves", inStock: true },
-  { id: 16, name: "SS Reserve Edition WK Gloves", category: "WK Equipment", brand: "SS", price: 95, image: IMAGES.wkGloves, description: "Premium leather construction", inStock: true },
-  { id: 17, name: "SG WK Pads", category: "WK Equipment", brand: "SG", price: 75, image: IMAGES.pads, description: "Lightweight keeping pads", inStock: true },
-  { id: 18, name: "SS Dragon WK Inner Gloves", category: "WK Equipment", brand: "SS", price: 25, image: IMAGES.gloves, description: "Cotton padded inners", inStock: true },
-  
-  // Shoes
-  { id: 19, name: "Adidas Howzat Cricket Spikes", category: "Shoes", brand: "Adidas", price: 100, image: IMAGES.shoes, description: "Full spike cricket shoes", inStock: true },
-  { id: 20, name: "Asics Gully 5 Cricket Shoes", category: "Shoes", brand: "Asics", price: 150, image: IMAGES.shoes, description: "Rubber sole all-rounder shoes", inStock: true },
-  { id: 21, name: "Puma Cricket 22 FH", category: "Shoes", brand: "Puma", price: 130, image: IMAGES.shoes, description: "Half spike cricket footwear", inStock: true },
-  { id: 22, name: "SG Sierra Cricket Shoes", category: "Shoes", brand: "SG", price: 75, image: IMAGES.shoes, description: "Affordable rubber sole shoes", inStock: true },
-  
-  // Kids
-  { id: 23, name: "SS Junior Cricket Bat Size 5", category: "Kids", brand: "SS", price: 45, image: IMAGES.bat, description: "Kashmir willow junior bat", inStock: true },
-  { id: 24, name: "SG Junior Batting Set", category: "Kids", brand: "SG", price: 120, image: IMAGES.kids, description: "Complete batting kit for juniors", inStock: true },
-  { id: 25, name: "Junior Batting Gloves", category: "Kids", brand: "SG", price: 35, image: IMAGES.gloves, description: "Youth size batting gloves", inStock: true },
-  { id: 26, name: "Kids Cricket Pads", category: "Kids", brand: "SS", price: 40, image: IMAGES.pads, description: "Youth batting leg guards", inStock: true },
-  
-  // Accessories
-  { id: 27, name: "Pro Fingerless Gloves Inner", category: "Accessories", brand: "Generic", price: 10, image: IMAGES.gloves, description: "Inner gloves for comfort", inStock: true },
-  { id: 28, name: "Players Full Gloves Inner", category: "Accessories", brand: "Generic", price: 15, image: IMAGES.gloves, description: "Full finger cotton inners", inStock: true },
-  { id: 29, name: "SS Ranjimax Cricket Ball", category: "Accessories", brand: "SS", price: 50, image: IMAGES.ball, description: "Premium leather cricket ball", inStock: true },
-  { id: 30, name: "Cricket Kit Bag Large", category: "Accessories", brand: "SG", price: 85, image: IMAGES.bag, description: "Wheelie kit bag", inStock: true },
-  { id: 31, name: "Bat Grip Set (3 Pack)", category: "Accessories", brand: "Generic", price: 12, image: IMAGES.accessories, description: "Replacement bat grips", inStock: true },
-  { id: 32, name: "Cricket Helmet Senior", category: "Accessories", brand: "Shrey", price: 95, image: IMAGES.helmet, description: "Steel grill cricket helmet", inStock: true },
-  { id: 33, name: "Arm Guard", category: "Accessories", brand: "SG", price: 18, image: IMAGES.accessories, description: "Forearm protection", inStock: true },
-  { id: 34, name: "Thigh Guard Set", category: "Accessories", brand: "SS", price: 28, image: IMAGES.pads, description: "Inner and outer thigh pads", inStock: true },
-  { id: 35, name: "Abdominal Guard", category: "Accessories", brand: "SG", price: 15, image: IMAGES.accessories, description: "Essential protection", inStock: true },
-];
-
 const categories = ["All", "Bats", "Gloves", "Pads", "WK Equipment", "Shoes", "Kids", "Accessories"];
 const brands = ["All", "SS", "SG", "Gray-Nicolls", "CEAT", "Adidas", "Asics", "Puma", "Shrey", "Generic"];
 
+// Admin password - change this!
+const ADMIN_PASSWORD = "rnrcricket2025";
+
 export default function RNRCricket() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedBrand, setSelectedBrand] = useState('All');
@@ -92,9 +46,124 @@ export default function RNRCricket() {
   const [orderFormOpen, setOrderFormOpen] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+  
+  // Admin states
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [newProduct, setNewProduct] = useState({
+    name: '', category: 'Bats', brand: 'SS', price: 0, image: '', description: '', in_stock: true
+  });
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching products:', error);
+    } else {
+      setProducts(data || []);
+    }
+    setLoading(false);
+  };
+
+  // Admin functions
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    if (adminPassword === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      setAdminPassword('');
+    } else {
+      alert('Incorrect password');
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{
+        name: newProduct.name,
+        category: newProduct.category,
+        brand: newProduct.brand,
+        price: parseFloat(newProduct.price),
+        image: newProduct.image || DEFAULT_IMAGES.default,
+        description: newProduct.description,
+        in_stock: newProduct.in_stock
+      }])
+      .select();
+    
+    if (error) {
+      alert('Error adding product: ' + error.message);
+    } else {
+      setProducts([data[0], ...products]);
+      setNewProduct({ name: '', category: 'Bats', brand: 'SS', price: 0, image: '', description: '', in_stock: true });
+      alert('Product added successfully!');
+    }
+  };
+
+  const handleUpdateProduct = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase
+      .from('products')
+      .update({
+        name: editingProduct.name,
+        category: editingProduct.category,
+        brand: editingProduct.brand,
+        price: parseFloat(editingProduct.price),
+        image: editingProduct.image,
+        description: editingProduct.description,
+        in_stock: editingProduct.in_stock
+      })
+      .eq('id', editingProduct.id);
+    
+    if (error) {
+      alert('Error updating product: ' + error.message);
+    } else {
+      setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
+      setEditingProduct(null);
+      alert('Product updated successfully!');
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      alert('Error deleting product: ' + error.message);
+    } else {
+      setProducts(products.filter(p => p.id !== id));
+    }
+  };
+
+  const handleToggleStock = async (product) => {
+    const { error } = await supabase
+      .from('products')
+      .update({ in_stock: !product.in_stock })
+      .eq('id', product.id);
+    
+    if (error) {
+      alert('Error updating stock: ' + error.message);
+    } else {
+      setProducts(products.map(p => p.id === product.id ? { ...p, in_stock: !p.in_stock } : p));
+    }
+  };
 
   // Filter and sort products
-  const filteredProducts = sampleProducts
+  const filteredProducts = products
     .filter(p => selectedCategory === 'All' || p.category === selectedCategory)
     .filter(p => selectedBrand === 'All' || p.brand === selectedBrand)
     .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -134,8 +203,26 @@ export default function RNRCricket() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const submitOrder = (e) => {
+  const submitOrder = async (e) => {
     e.preventDefault();
+    
+    // Save order to Supabase
+    const { error } = await supabase
+      .from('orders')
+      .insert([{
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        notes: formData.message,
+        items: cart,
+        total: cartTotal,
+        status: 'pending'
+      }]);
+    
+    if (error) {
+      console.error('Error saving order:', error);
+    }
+    
     setOrderSuccess(true);
     setTimeout(() => {
       setOrderFormOpen(false);
@@ -185,6 +272,18 @@ export default function RNRCricket() {
                 {item.toUpperCase()}
               </button>
             ))}
+            {isAdmin && (
+              <button
+                onClick={() => setCurrentPage('admin')}
+                className={`text-sm font-semibold tracking-wide transition-all duration-300 px-3 py-1 rounded-full ${
+                  currentPage === 'admin' 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-red-100 text-red-600 hover:bg-red-200'
+                }`}
+              >
+                ADMIN
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -231,24 +330,30 @@ export default function RNRCricket() {
                 {item}
               </button>
             ))}
+            {isAdmin && (
+              <button
+                onClick={() => { setCurrentPage('admin'); setMobileMenuOpen(false); }}
+                className="block w-full text-left px-6 py-4 text-red-600 hover:bg-red-50 font-medium border-b border-gray-100"
+              >
+                Admin Panel
+              </button>
+            )}
           </div>
         )}
       </div>
     </nav>
   );
 
-  // Hero Section with real image
+  // Hero Section
   const Hero = () => (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${IMAGES.hero})` }}
+        style={{ backgroundImage: `url(${DEFAULT_IMAGES.hero})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-950/95 via-blue-900/90 to-blue-800/80"></div>
       </div>
       
-      {/* Animated Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-red-500 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -289,7 +394,6 @@ export default function RNRCricket() {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <svg className="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -298,7 +402,7 @@ export default function RNRCricket() {
     </section>
   );
 
-  // Featured Categories with real images
+  // Featured Categories
   const FeaturedCategories = () => (
     <section className="py-20 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -319,14 +423,11 @@ export default function RNRCricket() {
               onClick={() => { setSelectedCategory(cat.name); setCurrentPage('shop'); }}
               className="group relative overflow-hidden rounded-2xl aspect-square transition-all duration-500 hover:scale-105 hover:shadow-2xl"
             >
-              {/* Background Image */}
               <div 
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
                 style={{ backgroundImage: `url(${CATEGORY_IMAGES[cat.name]})` }}
               />
-              {/* Overlay */}
               <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-70 group-hover:opacity-85 transition-opacity duration-500`}></div>
-              {/* Content */}
               <div className="relative z-10 h-full flex flex-col items-center justify-center">
                 <span className="text-white font-bold text-lg sm:text-xl tracking-wide drop-shadow-lg">{cat.name.toUpperCase()}</span>
               </div>
@@ -354,30 +455,46 @@ export default function RNRCricket() {
           </button>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {sampleProducts.slice(0, 8).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-500">Loading products...</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-500 text-lg">No products yet. Add products via the admin panel.</p>
+            <button 
+              onClick={() => setCurrentPage('admin')}
+              className="mt-4 text-red-600 font-semibold hover:underline"
+            >
+              Go to Admin Panel →
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.slice(0, 8).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 
-  // Product Card Component with real images
+  // Product Card Component
   const ProductCard = ({ product }) => (
-    <div 
-      className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500"
-    >
+    <div className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-500">
       <div 
         className="relative aspect-square bg-gray-100 cursor-pointer overflow-hidden"
         onClick={() => setSelectedProduct(product)}
       >
         <img 
-          src={product.image} 
+          src={product.image || DEFAULT_IMAGES.default} 
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          onError={(e) => { e.target.src = DEFAULT_IMAGES.default; }}
         />
-        {!product.inStock && (
+        {!product.in_stock && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <span className="text-white font-bold text-lg">OUT OF STOCK</span>
           </div>
@@ -397,15 +514,15 @@ export default function RNRCricket() {
         <div className="flex items-center justify-between">
           <span className="text-xl font-black text-red-600">${product.price}</span>
           <button
-            onClick={() => product.inStock && addToCart(product)}
-            disabled={!product.inStock}
+            onClick={() => product.in_stock && addToCart(product)}
+            disabled={!product.in_stock}
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-              product.inStock 
+              product.in_stock 
                 ? 'bg-blue-900 text-white hover:bg-red-600' 
                 : 'bg-gray-200 text-gray-500 cursor-not-allowed'
             }`}
           >
-            {product.inStock ? 'Add to Cart' : 'Sold Out'}
+            {product.in_stock ? 'Add to Cart' : 'Sold Out'}
           </button>
         </div>
       </div>
@@ -416,7 +533,6 @@ export default function RNRCricket() {
   const ShopPage = () => (
     <section className="pt-24 pb-20 px-4 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-black text-blue-900 mb-2">SHOP ALL PRODUCTS</h1>
           <p className="text-gray-600">{filteredProducts.length} products found</p>
@@ -428,7 +544,6 @@ export default function RNRCricket() {
             <div className="bg-white rounded-xl p-6 shadow-sm sticky top-24">
               <h3 className="font-bold text-gray-900 mb-4">Filters</h3>
               
-              {/* Search */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Search</label>
                 <input
@@ -440,7 +555,6 @@ export default function RNRCricket() {
                 />
               </div>
 
-              {/* Category Filter */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Category</label>
                 <select
@@ -454,7 +568,6 @@ export default function RNRCricket() {
                 </select>
               </div>
 
-              {/* Brand Filter */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Brand</label>
                 <select
@@ -468,7 +581,6 @@ export default function RNRCricket() {
                 </select>
               </div>
 
-              {/* Sort */}
               <div className="mb-6">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Sort By</label>
                 <select
@@ -482,7 +594,6 @@ export default function RNRCricket() {
                 </select>
               </div>
 
-              {/* Reset Filters */}
               <button
                 onClick={() => {
                   setSelectedCategory('All');
@@ -499,7 +610,12 @@ export default function RNRCricket() {
 
           {/* Product Grid */}
           <div className="flex-1">
-            {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-20">
+                <div className="inline-block w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-4 text-gray-500">Loading products...</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
                 <button
@@ -522,7 +638,7 @@ export default function RNRCricket() {
     </section>
   );
 
-  // Product Modal with real image
+  // Product Modal
   const ProductModal = () => {
     if (!selectedProduct) return null;
     return (
@@ -530,9 +646,10 @@ export default function RNRCricket() {
         <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={e => e.stopPropagation()}>
           <div className="relative aspect-video bg-gray-100">
             <img 
-              src={selectedProduct.image} 
+              src={selectedProduct.image || DEFAULT_IMAGES.default} 
               alt={selectedProduct.name}
               className="w-full h-full object-cover"
+              onError={(e) => { e.target.src = DEFAULT_IMAGES.default; }}
             />
             <button 
               onClick={() => setSelectedProduct(null)}
@@ -553,15 +670,15 @@ export default function RNRCricket() {
             <div className="flex items-center justify-between">
               <span className="text-3xl font-black text-red-600">${selectedProduct.price}</span>
               <button
-                onClick={() => { selectedProduct.inStock && addToCart(selectedProduct); setSelectedProduct(null); }}
-                disabled={!selectedProduct.inStock}
+                onClick={() => { selectedProduct.in_stock && addToCart(selectedProduct); setSelectedProduct(null); }}
+                disabled={!selectedProduct.in_stock}
                 className={`px-8 py-3 rounded-lg font-bold transition-all ${
-                  selectedProduct.inStock 
+                  selectedProduct.in_stock 
                     ? 'bg-red-600 text-white hover:bg-red-700' 
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {selectedProduct.inStock ? 'Add to Cart' : 'Out of Stock'}
+                {selectedProduct.in_stock ? 'Add to Cart' : 'Out of Stock'}
               </button>
             </div>
           </div>
@@ -570,7 +687,7 @@ export default function RNRCricket() {
     );
   };
 
-  // Cart Sidebar with real images
+  // Cart Sidebar
   const CartSidebar = () => (
     <div className={`fixed inset-0 z-50 ${cartOpen ? 'visible' : 'invisible'}`}>
       <div 
@@ -607,7 +724,7 @@ export default function RNRCricket() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
                     <div className="w-16 h-16 bg-white rounded-lg flex-shrink-0 overflow-hidden">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      <img src={item.image || DEFAULT_IMAGES.default} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">{item.name}</h3>
@@ -763,6 +880,328 @@ export default function RNRCricket() {
     );
   };
 
+  // Admin Panel
+  const AdminPanel = () => {
+    if (!isAdmin) {
+      return (
+        <section className="pt-24 pb-20 min-h-screen bg-gray-50">
+          <div className="max-w-md mx-auto px-4">
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Login</h1>
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Enter admin password"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  className="w-full py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  LOGIN
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    return (
+      <section className="pt-24 pb-20 min-h-screen bg-gray-100">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-black text-blue-900">Admin Panel</h1>
+              <p className="text-gray-600">Manage your products and inventory</p>
+            </div>
+            <button 
+              onClick={() => setIsAdmin(false)}
+              className="px-4 py-2 text-red-600 font-semibold hover:bg-red-50 rounded-lg transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+
+          {/* Add New Product Form */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Product</h2>
+            <form onSubmit={handleAddProduct} className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newProduct.name}
+                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($) *</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                <select
+                  value={newProduct.category}
+                  onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  {categories.filter(c => c !== 'All').map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Brand *</label>
+                <select
+                  value={newProduct.brand}
+                  onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                >
+                  {brands.filter(b => b !== 'All').map(brand => (
+                    <option key={brand} value={brand}>{brand}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <input
+                  type="url"
+                  value={newProduct.image}
+                  onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+                  placeholder="https://example.com/image.jpg (leave empty for default)"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="inStock"
+                  checked={newProduct.in_stock}
+                  onChange={(e) => setNewProduct({ ...newProduct, in_stock: e.target.checked })}
+                  className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                />
+                <label htmlFor="inStock" className="text-sm font-medium text-gray-700">In Stock</label>
+              </div>
+              <div className="flex justify-end">
+                <button 
+                  type="submit"
+                  className="px-6 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  + Add Product
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Products List */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Products ({products.length})</h2>
+            
+            {products.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No products yet. Add your first product above!</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Image</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Name</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Category</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Brand</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Price</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Stock</th>
+                      <th className="text-left py-3 px-2 font-semibold text-gray-700">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map(product => (
+                      <tr key={product.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-2">
+                          <img 
+                            src={product.image || DEFAULT_IMAGES.default} 
+                            alt={product.name}
+                            className="w-12 h-12 object-cover rounded"
+                            onError={(e) => { e.target.src = DEFAULT_IMAGES.default; }}
+                          />
+                        </td>
+                        <td className="py-3 px-2 font-medium">{product.name}</td>
+                        <td className="py-3 px-2 text-gray-600">{product.category}</td>
+                        <td className="py-3 px-2 text-gray-600">{product.brand}</td>
+                        <td className="py-3 px-2 font-semibold text-red-600">${product.price}</td>
+                        <td className="py-3 px-2">
+                          <button
+                            onClick={() => handleToggleStock(product)}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              product.in_stock 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {product.in_stock ? 'In Stock' : 'Out of Stock'}
+                          </button>
+                        </td>
+                        <td className="py-3 px-2">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setEditingProduct({ ...product })}
+                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm font-semibold hover:bg-blue-200"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm font-semibold hover:bg-red-200"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Edit Product Modal */}
+          {editingProduct && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-auto p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Edit Product</h2>
+                  <button onClick={() => setEditingProduct(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <form onSubmit={handleUpdateProduct} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingProduct.name}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Price ($) *</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        step="0.01"
+                        value={editingProduct.price}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                      <select
+                        value={editingProduct.category}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                      >
+                        {categories.filter(c => c !== 'All').map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Brand *</label>
+                    <select
+                      value={editingProduct.brand}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, brand: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      {brands.filter(b => b !== 'All').map(brand => (
+                        <option key={brand} value={brand}>{brand}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                    <input
+                      type="url"
+                      value={editingProduct.image || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      rows={3}
+                      value={editingProduct.description || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="editInStock"
+                      checked={editingProduct.in_stock}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, in_stock: e.target.checked })}
+                      className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                    />
+                    <label htmlFor="editInStock" className="text-sm font-medium text-gray-700">In Stock</label>
+                  </div>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProduct(null)}
+                      className="flex-1 py-3 border border-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit"
+                      className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  };
+
   // About Page
   const AboutPage = () => (
     <section className="pt-24 pb-20 min-h-screen">
@@ -839,29 +1278,17 @@ export default function RNRCricket() {
             <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
+                <input type="text" className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
+                <input type="email" className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                <textarea
-                  rows={5}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
+                <textarea rows={5} className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
               </div>
-              <button 
-                type="submit"
-                className="w-full py-4 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
-              >
+              <button type="submit" className="w-full py-4 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">
                 SEND MESSAGE
               </button>
             </form>
@@ -870,10 +1297,7 @@ export default function RNRCricket() {
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white rounded-2xl p-8">
               <h3 className="text-xl font-bold mb-4">Location</h3>
-              <p className="text-white/90">
-                Cayman Islands<br />
-                Serving cricketers across Grand Cayman
-              </p>
+              <p className="text-white/90">Cayman Islands<br />Serving cricketers across Grand Cayman</p>
             </div>
             
             <div className="bg-white rounded-2xl p-8 shadow-sm">
@@ -887,58 +1311,11 @@ export default function RNRCricket() {
             
             <div className="bg-red-50 rounded-2xl p-8 border border-red-100">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Inquiry?</h3>
-              <p className="text-gray-600 mb-4">
-                Looking for a specific product or have questions about our equipment? We're here to help!
-              </p>
-              <button 
-                onClick={() => setCurrentPage('shop')}
-                className="text-red-600 font-semibold hover:underline"
-              >
+              <p className="text-gray-600 mb-4">Looking for a specific product or have questions about our equipment? We're here to help!</p>
+              <button onClick={() => setCurrentPage('shop')} className="text-red-600 font-semibold hover:underline">
                 Browse our catalog →
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-
-  // Shipping Policy Page
-  const ShippingPage = () => (
-    <section className="pt-24 pb-20 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-4xl font-black text-blue-900 mb-8">SHIPPING POLICY</h1>
-        
-        <div className="prose prose-lg max-w-none">
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Local Delivery (Cayman Islands)</h2>
-            <p className="text-gray-600">We offer delivery across Grand Cayman. Delivery times and fees will be confirmed when we contact you to process your order.</p>
-          </div>
-          
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Order Processing</h2>
-            <p className="text-gray-600">Once you submit an order request, we will contact you within 24-48 hours to confirm product availability, finalize pricing, and arrange payment and delivery details.</p>
-          </div>
-          
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Payment</h2>
-            <p className="text-gray-600">Payment is arranged directly with RNR Cricket after order confirmation. We accept various payment methods which will be discussed when we contact you.</p>
-          </div>
-          
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Returns & Exchanges</h2>
-            <p className="text-gray-600">We want you to be completely satisfied with your purchase. If you have any issues with your order, please contact us within 7 days of receiving your items and we'll work with you to resolve the situation.</p>
-          </div>
-          
-          <div className="bg-red-50 rounded-xl p-6 border border-red-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Questions?</h2>
-            <p className="text-gray-600 mb-4">If you have any questions about shipping or our policies, please don't hesitate to reach out.</p>
-            <button 
-              onClick={() => setCurrentPage('contact')}
-              className="text-red-600 font-semibold hover:underline"
-            >
-              Contact Us →
-            </button>
           </div>
         </div>
       </div>
@@ -969,10 +1346,7 @@ export default function RNRCricket() {
             <ul className="space-y-2">
               {['Home', 'Shop', 'About', 'Contact'].map(link => (
                 <li key={link}>
-                  <button 
-                    onClick={() => setCurrentPage(link.toLowerCase())}
-                    className="text-white/70 hover:text-white transition-colors"
-                  >
+                  <button onClick={() => setCurrentPage(link.toLowerCase())} className="text-white/70 hover:text-white transition-colors">
                     {link}
                   </button>
                 </li>
@@ -981,14 +1355,11 @@ export default function RNRCricket() {
           </div>
           
           <div>
-            <h4 className="font-bold text-lg mb-4">Policies</h4>
+            <h4 className="font-bold text-lg mb-4">Admin</h4>
             <ul className="space-y-2">
               <li>
-                <button 
-                  onClick={() => setCurrentPage('shipping')}
-                  className="text-white/70 hover:text-white transition-colors"
-                >
-                  Shipping Policy
+                <button onClick={() => setCurrentPage('admin')} className="text-white/70 hover:text-white transition-colors">
+                  Admin Login
                 </button>
               </li>
             </ul>
@@ -1011,7 +1382,6 @@ export default function RNRCricket() {
       <FeaturedCategories />
       <FeaturedProducts />
       
-      {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-red-600 to-red-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">READY TO UPGRADE YOUR GEAR?</h2>
@@ -1035,7 +1405,7 @@ export default function RNRCricket() {
       {currentPage === 'shop' && <ShopPage />}
       {currentPage === 'about' && <AboutPage />}
       {currentPage === 'contact' && <ContactPage />}
-      {currentPage === 'shipping' && <ShippingPage />}
+      {currentPage === 'admin' && <AdminPanel />}
       
       <Footer />
       
