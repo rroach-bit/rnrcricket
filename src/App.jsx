@@ -14,14 +14,9 @@ const Ic = {
   clk:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
 };
 
-const SIcon = ({s,sz=48}) => {
-  const st={width:sz,height:sz};
-  if(s==="Cricket") return <svg style={st} viewBox="0 0 64 64" fill="none"><rect x="29" y="8" width="6" height="36" rx="3" fill={C.primary}/><ellipse cx="32" cy="52" rx="10" ry="5" fill={C.primary} opacity=".25"/><circle cx="50" cy="14" r="5" fill={C.primary} opacity=".5"/></svg>;
-  if(s==="Pickleball") return <svg style={st} viewBox="0 0 64 64" fill="none"><rect x="26" y="32" width="12" height="24" rx="4" fill={C.primary}/><ellipse cx="32" cy="24" rx="15" ry="17" fill={C.primary} opacity=".2" stroke={C.primary} strokeWidth="2"/><circle cx="28" cy="22" r="2" fill={C.primary} opacity=".4"/><circle cx="36" cy="20" r="2" fill={C.primary} opacity=".4"/><circle cx="32" cy="28" r="2" fill={C.primary} opacity=".4"/></svg>;
-  if(s==="Netball") return <svg style={st} viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="15" stroke={C.primary} strokeWidth="2.5" fill={C.primary} opacity=".12"/><line x1="17" y1="32" x2="47" y2="32" stroke={C.primary} strokeWidth="1.5"/><line x1="32" y1="17" x2="32" y2="47" stroke={C.primary} strokeWidth="1.5"/></svg>;
-  if(s==="Rugby") return <svg style={st} viewBox="0 0 64 64" fill="none"><ellipse cx="32" cy="32" rx="20" ry="11" transform="rotate(-30 32 32)" fill={C.primary} opacity=".15" stroke={C.primary} strokeWidth="2.5"/><line x1="26" y1="26" x2="38" y2="38" stroke={C.primary} strokeWidth="1.5"/></svg>;
-  if(s==="Football") return <svg style={st} viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="15" stroke={C.primary} strokeWidth="2.5" fill={C.primary} opacity=".12"/><path d="M24 20L32 16L40 20L44 28L40 36L32 40L24 36L20 28Z" stroke={C.primary} strokeWidth="1.5" fill="none"/></svg>;
-  return null;
+const SIcon = ({s,sz=80}) => {
+  const name = s.toLowerCase();
+  return <img src={`/icons/${name}.png`} alt={s} style={{width:sz,height:sz,objectFit:"contain",filter:"drop-shadow(0 4px 12px rgba(54,191,177,0.3))"}} />;
 };
 
 const HERO_IMG = "/rnr-hero.jpg";
@@ -212,8 +207,8 @@ export default function App(){
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16}}>
             {sports.map(s=>(
-              <div key={s.name} onClick={()=>s.name==="Pickleball"?sPg("pickleball"):sPg("shop")} style={{background:`linear-gradient(150deg,${s.c}15,${s.c}05)`,border:`1px solid ${s.c}22`,borderRadius:16,padding:26,cursor:"pointer",transition:"all .3s",textAlign:"center"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.borderColor=s.c+"77"}} onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor=s.c+"22"}}>
-                <div style={{margin:"0 auto 12px",width:48}}><SIcon s={s.name}/></div>
+              <div key={s.name} onClick={()=>s.name==="Pickleball"?sPg("pickleball"):sPg("shop")} style={{background:`linear-gradient(150deg,${s.c}15,${s.c}05)`,border:`1px solid ${s.c}22`,borderRadius:16,padding:"28px 20px",cursor:"pointer",transition:"all .3s",textAlign:"center"}} onMouseOver={e=>{e.currentTarget.style.transform="translateY(-5px)";e.currentTarget.style.borderColor=s.c+"77"}} onMouseOut={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.borderColor=s.c+"22"}}>
+                <div style={{margin:"0 auto 14px",width:90,height:90,display:"flex",alignItems:"center",justifyContent:"center"}}><SIcon s={s.name} sz={90}/></div>
                 <div style={{fontSize:17,fontWeight:800,color:C.white,marginBottom:5,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>{s.name}</div>
                 <div style={{fontSize:11.5,color:C.muted,lineHeight:1.4}}>{s.desc}</div>
               </div>
@@ -335,7 +330,7 @@ export default function App(){
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:22}}>
             {sports.map(s=>(
               <div key={s.name} onClick={()=>s.name==="Pickleball"?sPg("pickleball"):null} style={{background:`linear-gradient(150deg,${s.c}10,${s.c}04)`,border:`1px solid ${s.c}18`,borderRadius:20,padding:38,cursor:"pointer",transition:"all .3s"}} onMouseOver={e=>e.currentTarget.style.transform="translateY(-4px)"} onMouseOut={e=>e.currentTarget.style.transform="none"}>
-                <div style={{marginBottom:14}}><SIcon s={s.name} sz={54}/></div>
+                <div style={{marginBottom:16,width:80,height:80}}><SIcon s={s.name} sz={80}/></div>
                 <div style={{fontSize:23,fontWeight:800,color:C.white,marginBottom:7,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1}}>{s.name}</div>
                 <div style={{color:C.muted,fontSize:13.5,marginBottom:18,lineHeight:1.5}}>{s.desc}</div>
                 <span style={{color:C.primary,fontWeight:700,fontSize:12,textTransform:"uppercase",letterSpacing:1,fontFamily:"'Barlow Condensed',sans-serif",display:"flex",alignItems:"center",gap:6}}>{s.name==="Pickleball"?"Browse Selkirk Collection":"Coming Soon"} {Ic.arr}</span>
